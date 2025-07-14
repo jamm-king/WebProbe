@@ -1,0 +1,64 @@
+# === Build system ===
+.gradle/
+build/
+.gradle-cache/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# === Test & Coverage ===
+test-results/
+test-report/
+reports/
+coverage/
+jacoco/
+
+# === Docker ===
+docker-compose.override.yml
+.env
+*.log
+
+# === Kotlin ===
+.kotlin/
+*.class
+
+# === IDEs ===
+
+## IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+## VS Code
+.vscode/
+
+## Eclipse / STS
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+## NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# === OS-specific ===
+
+## macOS
+.DS_Store
+
+## Windows
+Thumbs.db

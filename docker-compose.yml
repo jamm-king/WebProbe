@@ -1,0 +1,29 @@
+version: '3.8'
+services:
+  mongo:
+    image: mongo:6
+    container_name: webprobe-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - webprobe-net
+
+  webprobe:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: webprobe-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongo
+    networks:
+      - webprobe-net
+
+volumes:
+  mongo-data:
+
+networks:
+  webprobe-net:
