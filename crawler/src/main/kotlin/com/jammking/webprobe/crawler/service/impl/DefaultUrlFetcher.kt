@@ -10,8 +10,10 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.jsoup.Jsoup
 import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Component
 import java.io.IOException
 
+@Component
 class DefaultUrlFetcher(
     private val client: OkHttpClient = OkHttpClient()
 ) : UrlFetcher {
