@@ -1,0 +1,10 @@
+spring:
+  data:
+    mongodb:
+      database: test_webprobe
+
+de:
+  flapdoodle:
+    mongodb:
+      embedded:
+        version: 5.0.5
