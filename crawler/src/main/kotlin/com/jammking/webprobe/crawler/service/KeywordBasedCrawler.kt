@@ -10,6 +10,7 @@ import com.jammking.webprobe.crawler.model.CrawlerStats
 import com.jammking.webprobe.crawler.model.ErrorReason
 import com.jammking.webprobe.crawler.port.Searcher
 import com.jammking.webprobe.crawler.port.UrlFetcher
+import com.jammking.webprobe.crawler.service.resolver.UrlFetcherResolver
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -20,7 +21,7 @@ import java.util.*
 @Service
 class KeywordBasedCrawler(
     private val searcher: Searcher,
-    private val urlFetcher: UrlFetcher
+    private val urlFetcherResolver: UrlFetcherResolver
 ) {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -43,6 +44,7 @@ class KeywordBasedCrawler(
         val fetchJobs = urls.map { url ->
             async {
                 try {
+                    val urlFetcher = urlFetcherResolver.resolve(url)
                     val page = urlFetcher.fetch(url)
                     pages.add(page)
                 } catch (e: FetchFailedException) {
