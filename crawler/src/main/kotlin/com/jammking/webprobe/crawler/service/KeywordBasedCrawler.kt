@@ -14,12 +14,14 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Service
 import java.util.*
 
+@Service
 class KeywordBasedCrawler(
     private val searcher: Searcher,
     private val urlFetcher: UrlFetcher
-    ) {
+) {
 
     private val log = LoggerFactory.getLogger(this::class.java)
 

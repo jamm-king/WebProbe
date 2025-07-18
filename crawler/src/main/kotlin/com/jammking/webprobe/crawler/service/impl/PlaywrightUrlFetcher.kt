@@ -9,7 +9,9 @@ import com.microsoft.playwright.PlaywrightException
 import com.microsoft.playwright.TimeoutError
 import com.microsoft.playwright.options.LoadState
 import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Component
 
+@Component
 class PlaywrightUrlFetcher : UrlFetcher {
 
     private val log = LoggerFactory.getLogger(this::class.java)

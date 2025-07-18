@@ -1,13 +1,18 @@
 package com.jammking.webprobe.crawler.service.impl
 
+import com.jammking.webprobe.crawler.CrawlerTestApplication
 import com.jammking.webprobe.crawler.model.CrawledPage
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest(classes = [CrawlerTestApplication::class])
 class PlaywrightUrlFetcherTest {
 
-    private val fetcher = PlaywrightUrlFetcher()
+    @Autowired
+    lateinit var fetcher: PlaywrightUrlFetcher
 
     @Test
     fun shouldFetchFromPage(): Unit = runBlocking {
