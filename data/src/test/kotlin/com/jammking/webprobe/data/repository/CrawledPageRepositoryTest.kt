@@ -1,15 +1,17 @@
 package com.jammking.webprobe.data.repository
 
+import com.jammking.webprobe.data.DataTestApplication
 import com.jammking.webprobe.data.entity.CrawledPage
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest
-import java.time.Duration
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.ActiveProfiles
 import java.time.Instant
 
-@DataMongoTest
+@ActiveProfiles("test")
+@SpringBootTest(classes = [DataTestApplication::class])
 class CrawledPageRepositoryTest {
 
     @Autowired
@@ -27,7 +29,6 @@ class CrawledPageRepositoryTest {
             text = "Hello",
             summary = "Short summary",
             createdAt = Instant.now(),
-            expiredAt = Instant.now().plus(Duration.ofDays(30))
         )
 
         log.info("Saving test CrawledPage for URL: $url")
