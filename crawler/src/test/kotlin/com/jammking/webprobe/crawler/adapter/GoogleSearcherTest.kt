@@ -1,4 +1,4 @@
-package com.jammking.webprobe.crawler.service.impl
+package com.jammking.webprobe.crawler.adapter
 
 import com.jammking.webprobe.crawler.CrawlerTestApplication
 import com.jammking.webprobe.crawler.adapter.searcher.GoogleSearcher
