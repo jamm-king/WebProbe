@@ -1,8 +1,8 @@
 package com.jammking.webprobe.crawler.service.resolver
 
 import com.jammking.webprobe.crawler.port.UrlFetcher
-import com.jammking.webprobe.crawler.service.impl.DefaultUrlFetcher
-import com.jammking.webprobe.crawler.service.impl.PlaywrightUrlFetcher
+import com.jammking.webprobe.crawler.adapter.fetcher.DefaultUrlFetcher
+import com.jammking.webprobe.crawler.adapter.fetcher.PlaywrightUrlFetcher
 import org.springframework.stereotype.Component
 
 @Component
