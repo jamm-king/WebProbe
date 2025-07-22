@@ -1,32 +1,42 @@
 package com.jammking.webprobe.crawler.adapter.robots
 
+import com.jammking.webprobe.crawler.exception.RobotsTxtException
 import com.jammking.webprobe.crawler.port.RobotsPolicy
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
 class RobotsTxtParser {
 
-    fun parse(raw: String): RobotsPolicy {
-        val rules = mutableMapOf<String, MutableList<String>>()
-        var currentAgent: String? = null
+    private val log = LoggerFactory.getLogger(this::class.java)
 
-        raw.lines().forEach { line ->
-            val trimmed = line.trim().lowercase()
-            when {
-                trimmed.startsWith("user-agent") -> {
-                    val agent = trimmed.removePrefix("user-agent:").trim()
-                    currentAgent = agent
-                    rules.putIfAbsent(agent, mutableListOf())
-                }
-                trimmed.startsWith("disallow:") && currentAgent != null -> {
-                    val path = trimmed.removePrefix("disallow:").trim()
-                    if(path.isNotEmpty()) {
-                        rules[currentAgent]?.add(path)
+    fun parse(raw: String): RobotsPolicy {
+        return try {
+            val rules = mutableMapOf<String, MutableList<String>>()
+            var currentAgent: String? = null
+
+            raw.lines().forEach { line ->
+                val trimmed = line.trim().lowercase()
+                when {
+                    trimmed.startsWith("user-agent") -> {
+                        val agent = trimmed.removePrefix("user-agent:").trim()
+                        currentAgent = agent
+                        rules.putIfAbsent(agent, mutableListOf())
+                    }
+                    trimmed.startsWith("disallow:") && currentAgent != null -> {
+                        val path = trimmed.removePrefix("disallow:").trim()
+                        if(path.isNotEmpty()) {
+                            rules[currentAgent]?.add(path)
+                        }
                     }
                 }
             }
-        }
 
-        return SimpleRobotsPolicy(rules)
+            log.debug("Parsed robots.txt with agents: {}", rules.keys)
+            SimpleRobotsPolicy(rules)
+        } catch(e: Exception) {
+            log.error("Failed to parse robots.txt", e)
+            throw RobotsTxtException("unknown", "parse failed", e)
+        }
     }
 }
