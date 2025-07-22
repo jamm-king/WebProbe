@@ -1,6 +1,7 @@
 package com.jammking.webprobe.crawler.service.impl
 
 import com.jammking.webprobe.crawler.CrawlerTestApplication
+import com.jammking.webprobe.crawler.adapter.fetcher.PlaywrightUrlFetcher
 import com.jammking.webprobe.crawler.model.CrawledPage
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat

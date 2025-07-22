@@ -21,6 +21,12 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 }
 
+tasks.bootJar {
+    enabled = false
+}
+tasks.jar {
+    enabled = true
+}
 tasks.test {
     useJUnitPlatform()
 }

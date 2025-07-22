@@ -1,4 +1,4 @@
-package com.jammking.webprobe.crawler.service.impl
+package com.jammking.webprobe.crawler.adapter.fetcher
 
 import com.jammking.webprobe.crawler.exception.FetchFailedException
 import com.jammking.webprobe.crawler.exception.ParseException
