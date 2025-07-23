@@ -20,8 +20,8 @@ class RobotsTxtEvaluator(
         return try {
             val robotsTxt = fetcher.fetch(domain)
             if(robotsTxt == null) {
-                log.info("robots.txt not found for $domain, disallowing by default")
-                false
+                log.info("robots.txt not found for $domain, allowing by default")
+                true
             } else {
                 val policy = parser.parse(robotsTxt)
                 val allowed = policy.isAllowed(userAgent, path)
