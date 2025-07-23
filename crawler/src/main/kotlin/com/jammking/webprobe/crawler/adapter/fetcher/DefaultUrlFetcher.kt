@@ -1,19 +1,14 @@
 package com.jammking.webprobe.crawler.adapter.fetcher
 
 import com.jammking.webprobe.common.http.HttpClient
-import com.jammking.webprobe.common.http.OkHttpClientWrapper
 import com.jammking.webprobe.crawler.exception.FetchFailedException
-import com.jammking.webprobe.crawler.exception.ParseException
 import com.jammking.webprobe.crawler.model.CrawledPage
 import com.jammking.webprobe.crawler.port.UrlFetcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import org.jsoup.Jsoup
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.io.IOException
 
 @Component
 class DefaultUrlFetcher(

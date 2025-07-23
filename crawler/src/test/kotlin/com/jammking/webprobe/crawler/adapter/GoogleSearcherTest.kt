@@ -2,6 +2,8 @@ package com.jammking.webprobe.crawler.adapter
 
 import com.jammking.webprobe.crawler.CrawlerTestApplication
 import com.jammking.webprobe.crawler.adapter.searcher.GoogleSearcher
+import com.jammking.webprobe.crawler.model.SearchEngine
+import com.jammking.webprobe.crawler.model.SearchRequest
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -20,10 +22,14 @@ class GoogleSearcherTest {
     @Test
     fun `should return urls for a given keyword`() = runBlocking {
         // given
-        val keyword = "포항 분위기 좋은 카페"
+        val request = SearchRequest(
+            keyword = "포항 분위기 좋은 카페",
+            engines = listOf(SearchEngine.GOOGLE),
+            maxResults = 5
+        )
 
         // when
-        val urls = googleSearcher.search(keyword)
+        val urls = googleSearcher.search(request)
 
         // then
         assertTrue(urls.isNotEmpty(), "Search result should not be empty.")

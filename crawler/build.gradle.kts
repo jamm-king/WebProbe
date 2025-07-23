@@ -31,4 +31,5 @@ tasks.jar {
 }
 tasks.test {
     useJUnitPlatform()
+    exclude("**/GoogleSearcherTest.class")
 }

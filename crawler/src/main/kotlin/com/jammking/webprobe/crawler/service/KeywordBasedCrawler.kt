@@ -3,13 +3,8 @@ package com.jammking.webprobe.crawler.service
 import com.jammking.webprobe.crawler.exception.FetchFailedException
 import com.jammking.webprobe.crawler.exception.ParseException
 import com.jammking.webprobe.crawler.exception.SearcherException
-import com.jammking.webprobe.crawler.exception.SummarizationException
-import com.jammking.webprobe.crawler.model.CrawledPage
-import com.jammking.webprobe.crawler.model.CrawlerResult
-import com.jammking.webprobe.crawler.model.CrawlerStats
-import com.jammking.webprobe.crawler.model.ErrorReason
+import com.jammking.webprobe.crawler.model.*
 import com.jammking.webprobe.crawler.port.Searcher
-import com.jammking.webprobe.crawler.port.UrlFetcher
 import com.jammking.webprobe.crawler.service.resolver.UrlFetcherResolver
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -20,43 +15,58 @@ import java.util.*
 
 @Service
 class KeywordBasedCrawler(
-    private val searcher: Searcher,
+    private val searcherMap: Map<SearchEngine, Searcher>,
     private val urlFetcherResolver: UrlFetcherResolver
-) {
+): Crawler {
 
     private val log = LoggerFactory.getLogger(this::class.java)
 
-    suspend fun crawl(keyword: String): CrawlerResult = coroutineScope {
-        val urls = try {
-            searcher.search(keyword)
-        } catch (e: SearcherException) {
-            log.error("Search failed for keyword: $keyword", e)
-            return@coroutineScope CrawlerResult(
-                pages = emptyList(),
-                stats = CrawlerStats(0, 0, 0),
-                errors = mapOf("search:$keyword" to ErrorReason.SEARCH_FAILED)
-            )
-        }
+    override suspend fun crawl(request: SearchRequest): CrawlerResult = coroutineScope {
+        val engines = request.engines
+        val totalPage = request.maxResults
+        val pagesPerEngine = distributePages(totalPage, engines.size)
 
-        val pages = Collections.synchronizedList(mutableListOf<CrawledPage>())
+        val allUrls = Collections.synchronizedList(mutableListOf<String>())
         val errors = Collections.synchronizedMap(mutableMapOf<String, ErrorReason>())
 
-        val fetchJobs = urls.map { url ->
+        engines.mapIndexed { idx, engine ->
+            async {
+                val searcher = searcherMap[engine]
+                if(searcher == null) {
+                    log.warn("No searcher found for $engine")
+                    errors["search:$engine"] = ErrorReason.SEARCH_FAILED
+                    return@async
+                }
+
+                val partialRequest = request.copy(
+                    engines = listOf(engine),
+                    maxResults = pagesPerEngine[idx]
+                )
+
+                try {
+                    val urls = searcher.search(partialRequest)
+                    allUrls.addAll(urls)
+                } catch(e: SearcherException) {
+                    log.error("Search failed for engine: $engine, keyword: ${request.keyword}", e)
+                    errors["search:$engine"] = ErrorReason.SEARCH_FAILED
+                }
+            }
+        }.awaitAll()
+
+        val pages = Collections.synchronizedList(mutableListOf<CrawledPage>())
+        val fetchJobs = allUrls.map { url ->
             async {
                 try {
-                    val urlFetcher = urlFetcherResolver.resolve(url)
-                    val page = urlFetcher.fetch(url)
+                    val fetcher = urlFetcherResolver.resolve(url)
+                    val page = fetcher.fetch(url)
                     pages.add(page)
-                } catch (e: FetchFailedException) {
+                } catch(e: FetchFailedException) {
                     log.warn("Fetch failed for $url", e)
                     errors[url] = ErrorReason.FETCH_FAILED
-                } catch (e: ParseException) {
+                } catch(e: ParseException) {
                     log.warn("Parse failed for $url", e)
                     errors[url] = ErrorReason.PARSING_FAILED
-                } catch (e: SummarizationException) {
-                    log.warn("Summarization failed for $url", e)
-                    errors[url] = ErrorReason.SUMMARY_FAILED
-                } catch (e: Exception) {
+                } catch(e: Exception) {
                     log.error("Unknown error for $url", e)
                     errors[url] = ErrorReason.UNKNOWN
                 }
@@ -68,7 +78,7 @@ class KeywordBasedCrawler(
         return@coroutineScope CrawlerResult(
             pages = pages,
             stats = CrawlerStats(
-                totalUrls = urls.size,
+                totalUrls = allUrls.size,
                 successCount = pages.size,
                 failureCount = errors.size
             ),
@@ -76,4 +86,9 @@ class KeywordBasedCrawler(
         )
     }
 
+    private fun distributePages(total: Int, parts: Int): List<Int> {
+        val base = total / parts
+        val remainder = total % parts
+        return List(parts) { if (it < remainder) base + 1 else base }
+    }
 }
