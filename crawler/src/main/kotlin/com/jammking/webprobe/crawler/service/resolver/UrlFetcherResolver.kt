@@ -15,6 +15,6 @@ class UrlFetcherResolver(
     }
 
     private fun requiresJs(url: String): Boolean {
-        return listOf("blog.naver.com").any { url.contains(it) }
+        return listOf("blog.naver.com", "tistory.com").any { url.contains(it) }
     }
 }
