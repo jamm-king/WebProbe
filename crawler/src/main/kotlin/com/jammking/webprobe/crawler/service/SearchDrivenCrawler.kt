@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class KeywordBasedCrawler(
+class SearchDrivenCrawler(
     private val searcherMap: Map<SearchEngine, Searcher>,
     private val urlFetcherResolver: UrlFetcherResolver
 ): Crawler {
