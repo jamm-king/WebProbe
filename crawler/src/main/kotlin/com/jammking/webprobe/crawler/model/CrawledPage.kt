@@ -5,5 +5,4 @@ data class CrawledPage(
     val title: String,
     val html: String,
     val text: String,
-    val summary: String? = null
 )
