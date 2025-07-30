@@ -1,5 +1,6 @@
 package com.jammking.webprobe.crawler.service
 
+import com.jammking.webprobe.crawler.adapter.robots.RobotsTxtEvaluator
 import com.jammking.webprobe.crawler.exception.FetchFailedException
 import com.jammking.webprobe.crawler.exception.ParseException
 import com.jammking.webprobe.crawler.exception.SearcherException
@@ -11,12 +12,14 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.net.URL
 import java.util.*
 
 @Service
 class SearchDrivenCrawler(
     private val searcherMap: Map<SearchEngine, Searcher>,
-    private val urlFetcherResolver: UrlFetcherResolver
+    private val urlFetcherResolver: UrlFetcherResolver,
+    private val robotsEvaluator: RobotsTxtEvaluator
 ): Crawler {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -54,21 +57,38 @@ class SearchDrivenCrawler(
         }.awaitAll()
 
         val pages = Collections.synchronizedList(mutableListOf<CrawledPage>())
-        val fetchJobs = allUrls.map { url ->
-            async {
-                try {
-                    val fetcher = urlFetcherResolver.resolve(url)
-                    val page = fetcher.fetch(url)
-                    pages.add(page)
-                } catch(e: FetchFailedException) {
-                    log.warn("Fetch failed for $url", e)
-                    errors[url] = ErrorReason.FETCH_FAILED
-                } catch(e: ParseException) {
-                    log.warn("Parse failed for $url", e)
-                    errors[url] = ErrorReason.PARSING_FAILED
-                } catch(e: Exception) {
-                    log.error("Unknown error for $url", e)
-                    errors[url] = ErrorReason.UNKNOWN
+        val fetchJobs = allUrls.mapNotNull { url ->
+            val allowed = try {
+                val parsedUrl = URL(url)
+                val domain = parsedUrl.host
+                val path = parsedUrl.path
+                robotsEvaluator.isAllowed(domain, path, "WebProbeBot")
+            } catch(e: Exception) {
+                log.warn("robots.txt check failed for $url", e)
+                errors[url] = ErrorReason.ROBOTS_TXT_FAILED
+                false
+            }
+
+            if(!allowed) {
+                log.info("robots.txt blocked access to $url")
+                errors[url] = ErrorReason.ROBOTS_TXT_FAILED
+                null
+            } else {
+                async {
+                    try {
+                        val fetcher = urlFetcherResolver.resolve(url)
+                        val page = fetcher.fetch(url)
+                        pages.add(page)
+                    } catch(e: FetchFailedException) {
+                        log.warn("Fetch failed for $url", e)
+                        errors[url] = ErrorReason.FETCH_FAILED
+                    } catch(e: ParseException) {
+                        log.warn("Parse failed for $url", e)
+                        errors[url] = ErrorReason.PARSING_FAILED
+                    } catch(e: Exception) {
+                        log.error("Unknown error for $url", e)
+                        errors[url] = ErrorReason.UNKNOWN
+                    }
                 }
             }
         }
