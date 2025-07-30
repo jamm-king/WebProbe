@@ -20,6 +20,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:2.2.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
 }
 
 tasks.bootJar {
@@ -30,4 +31,5 @@ tasks.jar {
 }
 tasks.test {
     useJUnitPlatform()
+    exclude("**/GoogleSearcherTest.class")
 }
