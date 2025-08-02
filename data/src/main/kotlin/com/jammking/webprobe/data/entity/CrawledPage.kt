@@ -14,4 +14,20 @@ data class CrawledPage(
     val text: String,
     @Indexed(expireAfterSeconds = 60 * 60 * 24 * 30)
     val createdAt: Instant = Instant.now(),
-)
+) {
+    companion object {
+        fun of(
+            url: String,
+            title: String,
+            html: String,
+            text: String
+        ): CrawledPage {
+            return CrawledPage(
+                url = url,
+                title = title,
+                html = html,
+                text = text
+            )
+        }
+    }
+}

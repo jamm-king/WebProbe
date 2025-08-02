@@ -8,6 +8,7 @@ interface UserSeenUrlRepository: MongoRepository<UserSeenUrl, String> {
     fun findByUserIdAndUrl(userId: String, url: String): UserSeenUrl?
     fun findAllByUserId(userId: String): List<UserSeenUrl>
     fun deleteAllByUserId(userId: String)
+    fun existsByUserIdAndUrl(userId: String, url: String): Boolean
 
     @Query(value = "{'userid': ?0}", fields = "{'url': 1, '_id': 0}")
     fun findOnlyUrlsByUserId(userId: String): List<String>
