@@ -7,6 +7,7 @@ plugins {
 
 dependencies {
     implementation(project(":common"))
+
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
     implementation("org.slf4j:slf4j-api:2.0.17")

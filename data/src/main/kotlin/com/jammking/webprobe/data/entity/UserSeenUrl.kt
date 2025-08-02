@@ -15,4 +15,16 @@ data class UserSeenUrl(
     val url: String,
     @Indexed(expireAfterSeconds = 60 * 60 * 24 * 30)
     val seenAt: Instant = Instant.now()
-)
+) {
+    companion object {
+        fun of(
+            userId: String,
+            url: String
+        ): UserSeenUrl {
+            return UserSeenUrl(
+                userId = userId,
+                url = url
+            )
+        }
+    }
+}
