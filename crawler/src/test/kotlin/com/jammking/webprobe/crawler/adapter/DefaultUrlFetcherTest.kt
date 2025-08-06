@@ -4,7 +4,7 @@ import com.jammking.webprobe.common.http.HttpClient
 import com.jammking.webprobe.common.http.HttpResponse
 import com.jammking.webprobe.crawler.adapter.fetcher.DefaultUrlFetcher
 import com.jammking.webprobe.crawler.exception.FetchFailedException
-import com.jammking.webprobe.crawler.model.CrawledPage
+import com.jammking.webprobe.data.entity.CrawledPage
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
