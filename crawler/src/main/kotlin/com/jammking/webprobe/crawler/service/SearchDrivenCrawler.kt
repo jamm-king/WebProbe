@@ -7,6 +7,9 @@ import com.jammking.webprobe.crawler.exception.SearcherException
 import com.jammking.webprobe.crawler.model.*
 import com.jammking.webprobe.crawler.port.Searcher
 import com.jammking.webprobe.crawler.service.resolver.UrlFetcherResolver
+import com.jammking.webprobe.data.entity.CrawledPage
+import com.jammking.webprobe.data.service.CrawledPageStorage
+import com.jammking.webprobe.data.service.UserSeenStorage
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -19,12 +22,21 @@ import java.util.*
 class SearchDrivenCrawler(
     private val searcherMap: Map<SearchEngine, Searcher>,
     private val urlFetcherResolver: UrlFetcherResolver,
-    private val robotsEvaluator: RobotsTxtEvaluator
+    private val robotsEvaluator: RobotsTxtEvaluator,
+    private val crawledPageStorage: CrawledPageStorage,
+    private val userSeenStorage: UserSeenStorage
 ): Crawler {
 
     private val log = LoggerFactory.getLogger(this::class.java)
 
     override suspend fun crawl(request: SearchRequest): CrawlerResult = coroutineScope {
+        val userId = request.userId
+        val fresh = request.fresh
+
+        if(fresh && userId == null) {
+            throw IllegalArgumentException("fresh request required userId")
+        }
+
         val engines = request.engines
         val totalPage = request.maxResults
         val pagesPerEngine = distributePages(totalPage, engines.size)
@@ -56,8 +68,20 @@ class SearchDrivenCrawler(
             }
         }.awaitAll()
 
-        val pages = Collections.synchronizedList(mutableListOf<CrawledPage>())
-        val fetchJobs = allUrls.mapNotNull { url ->
+        val cachedPages = Collections.synchronizedList(mutableListOf<CrawledPage>())
+        val urlsToFetch = Collections.synchronizedList(mutableListOf<String>())
+
+        allUrls.forEach { url ->
+            val cachedPage = crawledPageStorage.findByUrl(url)
+            if(cachedPage != null) {
+                cachedPages.add(cachedPage)
+            } else {
+                urlsToFetch.add(url)
+            }
+        }
+
+        val pages = Collections.synchronizedList(cachedPages)
+        val fetchJobs = urlsToFetch.mapNotNull { url ->
             val allowed = try {
                 val parsedUrl = URL(url)
                 val domain = parsedUrl.host
@@ -78,7 +102,11 @@ class SearchDrivenCrawler(
                     try {
                         val fetcher = urlFetcherResolver.resolve(url)
                         val page = fetcher.fetch(url)
+
+                        crawledPageStorage.save(url, page.title, page.html, page.text)
                         pages.add(page)
+
+                        userId?.let { userSeenStorage.save(it, url) }
                     } catch(e: FetchFailedException) {
                         log.warn("Fetch failed for $url", e)
                         errors[url] = ErrorReason.FETCH_FAILED

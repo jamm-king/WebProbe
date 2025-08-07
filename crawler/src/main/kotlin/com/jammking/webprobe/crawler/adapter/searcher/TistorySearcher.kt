@@ -6,6 +6,7 @@ import com.jammking.webprobe.crawler.model.SearchRequest
 import com.jammking.webprobe.crawler.port.Searcher
 import com.jammking.webprobe.crawler.port.UrlFetcher
 import com.jammking.webprobe.crawler.service.resolver.UrlFetcherResolver
+import com.jammking.webprobe.data.service.UserSeenStorage
 import kotlinx.coroutines.delay
 import org.jsoup.Jsoup
 import org.slf4j.LoggerFactory
@@ -14,7 +15,8 @@ import java.net.URLEncoder
 
 @Component
 class TistorySearcher(
-    private val urlFetcherResolver: UrlFetcherResolver
+    private val urlFetcherResolver: UrlFetcherResolver,
+    private val userSeenStorage: UserSeenStorage
 ): Searcher {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -22,9 +24,12 @@ class TistorySearcher(
     override suspend fun search(request: SearchRequest): List<String> {
         val keyword = request.keyword
         val maxResults = request.maxResults
-        val collected = mutableSetOf<String>()
+        val fresh = request.fresh
+        val userId = request.userId
 
+        val collected = mutableSetOf<String>()
         var page = 1
+
         while(collected.size < maxResults) {
             delay(1000)
 
@@ -42,14 +47,26 @@ class TistorySearcher(
             val urls = doc.select("a.link_cont")
                 .mapNotNull { it.attr("href") }
                 .filter { it.startsWith("http") }
-                .filterNot { it in collected }
 
             if(urls.isEmpty()) {
                 log.debug("No more results on page $page for keyword '$keyword'")
                 break
             }
 
-            collected.addAll(urls)
+            val newUrls = if(fresh && userId != null) {
+                urls.filterNot{ userSeenStorage.isSeen(userId, it) }
+            } else {
+                urls
+            }
+
+            val added = newUrls.filterNot { it in collected }
+            collected.addAll(added)
+
+            if(added.isEmpty()) {
+                log.debug("No new unvisited URLs found on page $page")
+                break
+            }
+
             page++
         }
 

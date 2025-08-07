@@ -2,8 +2,8 @@ package com.jammking.webprobe.crawler.adapter.fetcher
 
 import com.jammking.webprobe.common.http.HttpClient
 import com.jammking.webprobe.crawler.exception.FetchFailedException
-import com.jammking.webprobe.crawler.model.CrawledPage
 import com.jammking.webprobe.crawler.port.UrlFetcher
+import com.jammking.webprobe.data.entity.CrawledPage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
