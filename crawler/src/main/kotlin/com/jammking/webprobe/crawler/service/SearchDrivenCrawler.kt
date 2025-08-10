@@ -1,5 +1,6 @@
 package com.jammking.webprobe.crawler.service
 
+import com.jammking.webprobe.common.exception.InvalidSearchRequestException
 import com.jammking.webprobe.crawler.adapter.robots.RobotsTxtEvaluator
 import com.jammking.webprobe.crawler.exception.FetchFailedException
 import com.jammking.webprobe.crawler.exception.ParseException
@@ -35,7 +36,7 @@ class SearchDrivenCrawler(
         val fresh = request.fresh
 
         if(fresh && userId == null) {
-            throw IllegalArgumentException("fresh request required userId")
+            throw InvalidSearchRequestException("fresh request required userId")
         }
 
         val engines = request.engines
