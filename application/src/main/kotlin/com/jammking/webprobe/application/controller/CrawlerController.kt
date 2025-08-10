@@ -1,6 +1,6 @@
 package com.jammking.webprobe.application.controller
 
-import com.jammking.webprobe.application.exception.InvalidSearchRequestException
+import com.jammking.webprobe.common.exception.InvalidSearchRequestException
 import com.jammking.webprobe.crawler.model.CrawlerResult
 import com.jammking.webprobe.crawler.model.SearchRequest
 import com.jammking.webprobe.crawler.service.Crawler
