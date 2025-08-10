@@ -1,5 +1,6 @@
 package com.jammking.webprobe.application.exception
 
+import com.jammking.webprobe.common.exception.InvalidSearchRequestException
 import com.jammking.webprobe.common.exception.WebProbeException
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
