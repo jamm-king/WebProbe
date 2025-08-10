@@ -1,4 +1,4 @@
-package com.jammking.webprobe.application.exception
+package com.jammking.webprobe.common.exception
 
 import com.jammking.webprobe.common.exception.WebProbeException
 
