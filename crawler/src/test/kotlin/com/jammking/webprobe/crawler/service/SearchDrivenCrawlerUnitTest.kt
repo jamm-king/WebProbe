@@ -9,6 +9,7 @@ import com.jammking.webprobe.crawler.port.Searcher
 import com.jammking.webprobe.crawler.port.UrlFetcher
 import com.jammking.webprobe.crawler.service.resolver.UrlFetcherResolver
 import com.jammking.webprobe.data.entity.CrawledPage
+import com.jammking.webprobe.data.exception.StorageException
 import com.jammking.webprobe.data.service.CrawledPageStorage
 import com.jammking.webprobe.data.service.UserSeenStorage
 import kotlinx.coroutines.test.runTest
@@ -126,5 +127,113 @@ class SearchDrivenCrawlerUnitTest {
         verify(fetcher).fetch(newUrl)
         verify(crawledPageStorage).save(newUrl, "New Title", "<html>New</html>", "New text")
         verify(userSeenStorage).save(userId, newUrl)
+    }
+
+    @Test
+    fun `should fetch when cache lookup throws StorageException`() = runTest {
+        // given
+        val url = "https://test.com/page1"
+        val request = SearchRequest(
+            keyword = "example",
+            engines = listOf(SearchEngine.TISTORY),
+            maxResults = 1
+        )
+
+        whenever(searcher.search(any())).thenReturn(listOf(url))
+        whenever(robotsTxtEvaluator.isAllowed("test.com", "/page1", "WebProbeBot")).thenReturn(true)
+
+        val fetchedPage = CrawledPage(url, "Title", "<html>...</html>", "Text")
+        val fetcher = mock<UrlFetcher> {
+            onBlocking { fetch(url) } doReturn(fetchedPage)
+        }
+        whenever(urlFetcherResolver.resolve(url)).thenReturn(fetcher)
+
+        // when
+        val result = crawler.crawl(request)
+
+        // then
+        assertEquals(1, result.pages.size)
+        assertEquals(url, result.pages[0].url)
+        assertEquals(1, result.stats.successCount)
+        assertEquals(0, result.stats.failureCount)
+
+        verify(searcher).search(any())
+        verify(crawledPageStorage).findByUrl(url)
+        verify(robotsTxtEvaluator).isAllowed("test.com", "/page1", "WebProbeBot")
+        verify(urlFetcherResolver).resolve(url)
+        verify(fetcher).fetch(url)
+        verify(crawledPageStorage).save(url, "Title", "<html>...</html>", "Text")
+    }
+
+    @Test
+    fun `should include page even if storage save throws StorageException`() = runTest {
+        // given
+        val url = "https://test.com/page2"
+        val request = SearchRequest(
+            keyword = "example",
+            engines = listOf(SearchEngine.TISTORY),
+            maxResults = 1
+        )
+
+        whenever(searcher.search(any())).thenReturn(listOf(url))
+        whenever(crawledPageStorage.findByUrl(url)).thenReturn(null)
+        whenever(robotsTxtEvaluator.isAllowed("test.com", "/page2", "WebProbeBot")).thenReturn(true)
+
+        val fetchedPage = CrawledPage(url, "New Title", "<html>New</html>", "New text")
+        val fetcher = mock<UrlFetcher> {
+            onBlocking { fetch(url) } doReturn(fetchedPage)
+        }
+        whenever(urlFetcherResolver.resolve(url)).thenReturn(fetcher)
+        whenever(crawledPageStorage.save(url, "New Title", "<html>New</html>", "New text"))
+            .thenThrow(StorageException("Save failed"))
+
+        // when
+        val result = crawler.crawl(request)
+
+        // then
+        assertEquals(1, result.pages.size)
+        assertEquals(url, result.pages[0].url)
+        assertEquals(1, result.stats.successCount)
+        assertEquals(0, result.stats.failureCount)
+
+        verify(fetcher).fetch(url)
+        verify(crawledPageStorage).save(url, "New Title", "<html>New</html>", "New text")
+    }
+
+    @Test
+    fun `should ignore userSeen save failure`() = runTest {
+        // given
+        val userId = "user123"
+        val url = "https://test.com/page3"
+        val request = SearchRequest(
+            keyword = "example",
+            engines = listOf(SearchEngine.TISTORY),
+            maxResults = 1,
+            userId = userId,
+            fresh = true
+        )
+
+        whenever(searcher.search(any())).thenReturn(listOf(url))
+        whenever(crawledPageStorage.findByUrl(url)).thenReturn(null)
+        whenever(robotsTxtEvaluator.isAllowed("test.com", "/page3", "WebProbeBot")).thenReturn(true)
+
+        val fetchedPage = CrawledPage(url, "T", "<html></html>", "txt")
+        val fetcher = mock<UrlFetcher> {
+            onBlocking { fetch(url) } doReturn(fetchedPage)
+        }
+        whenever(urlFetcherResolver.resolve(url)).thenReturn(fetcher)
+        whenever(userSeenStorage.save(userId, url))
+            .thenThrow(StorageException("userSeen save failed"))
+
+        // when
+        val result = crawler.crawl(request)
+
+        // then
+        assertEquals(1, result.pages.size)
+        assertEquals(url, result.pages[0].url)
+        assertEquals(1, result.stats.successCount)
+        assertEquals(0, result.stats.failureCount)
+
+        verify(userSeenStorage).save(userId, url)
     }
 }
