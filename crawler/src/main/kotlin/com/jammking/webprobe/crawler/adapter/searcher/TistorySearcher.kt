@@ -6,6 +6,7 @@ import com.jammking.webprobe.crawler.model.SearchRequest
 import com.jammking.webprobe.crawler.port.Searcher
 import com.jammking.webprobe.crawler.port.UrlFetcher
 import com.jammking.webprobe.crawler.service.resolver.UrlFetcherResolver
+import com.jammking.webprobe.data.exception.StorageException
 import com.jammking.webprobe.data.service.UserSeenStorage
 import kotlinx.coroutines.delay
 import org.jsoup.Jsoup
@@ -54,7 +55,12 @@ class TistorySearcher(
             }
 
             val newUrls = if(fresh && userId != null) {
-                urls.filterNot{ userSeenStorage.isSeen(userId, it) }
+                try {
+                    urls.filterNot { userSeenStorage.isSeen(userId, it) }
+                } catch(e: StorageException) {
+                    log.warn("userSeen check failed for user $userId", e)
+                    urls
+                }
             } else {
                 urls
             }

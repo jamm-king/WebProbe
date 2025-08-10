@@ -8,6 +8,7 @@ import com.jammking.webprobe.crawler.model.*
 import com.jammking.webprobe.crawler.port.Searcher
 import com.jammking.webprobe.crawler.service.resolver.UrlFetcherResolver
 import com.jammking.webprobe.data.entity.CrawledPage
+import com.jammking.webprobe.data.exception.StorageException
 import com.jammking.webprobe.data.service.CrawledPageStorage
 import com.jammking.webprobe.data.service.UserSeenStorage
 import kotlinx.coroutines.async
@@ -72,7 +73,12 @@ class SearchDrivenCrawler(
         val urlsToFetch = Collections.synchronizedList(mutableListOf<String>())
 
         allUrls.forEach { url ->
-            val cachedPage = crawledPageStorage.findByUrl(url)
+            val cachedPage = try {
+                crawledPageStorage.findByUrl(url)
+            } catch(e: StorageException) {
+                log.warn("Cache lookup failed for $url", e)
+                null
+            }
             if(cachedPage != null) {
                 cachedPages.add(cachedPage)
             } else {
@@ -103,10 +109,20 @@ class SearchDrivenCrawler(
                         val fetcher = urlFetcherResolver.resolve(url)
                         val page = fetcher.fetch(url)
 
-                        crawledPageStorage.save(url, page.title, page.html, page.text)
+                        try {
+                            crawledPageStorage.save(url, page.title, page.html, page.text)
+                        } catch(e: StorageException) {
+                            log.warn("Failed to save crawled page for $url", e)
+                        }
                         pages.add(page)
 
-                        userId?.let { userSeenStorage.save(it, url) }
+                        userId?.let {
+                            try {
+                                userSeenStorage.save(it, url)
+                            } catch(e: StorageException) {
+                                log.warn("Failed to record userSeen for user $userId and url $url", e)
+                            }
+                        }
                     } catch(e: FetchFailedException) {
                         log.warn("Fetch failed for $url", e)
                         errors[url] = ErrorReason.FETCH_FAILED
