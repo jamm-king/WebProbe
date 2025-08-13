@@ -8,15 +8,26 @@ import com.jammking.webprobe.data.entity.CrawledPage
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.Mock
+import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.*
 
+@ExtendWith(MockitoExtension::class)
+class DefaultUrlFetcherUnitTest {
 
-class DefaultUrlFetcherTest {
+    @Mock
+    lateinit var httpClient: HttpClient
 
-    private val httpClient: HttpClient = mock()
-    private val fetcher = DefaultUrlFetcher(httpClient)
+    private lateinit var fetcher: DefaultUrlFetcher
+
+    @BeforeEach
+    fun setup() {
+        fetcher = DefaultUrlFetcher(httpClient)
+    }
 
     @Test
     fun `should fetch and parse html page`() = runBlocking {

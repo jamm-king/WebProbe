@@ -1,15 +1,19 @@
 package com.jammking.webprobe.crawler.adapter
 
-import com.jammking.webprobe.crawler.CrawlerTestApplication
+import com.jammking.webprobe.CrawlerDataTestApplication
 import com.jammking.webprobe.crawler.adapter.fetcher.PlaywrightUrlFetcher
 import com.jammking.webprobe.data.entity.CrawledPage
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.ActiveProfiles
 
-@SpringBootTest(classes = [CrawlerTestApplication::class])
+@Tag("integration")
+@ActiveProfiles("integration")
+@SpringBootTest(classes = [CrawlerDataTestApplication::class])
 class PlaywrightUrlFetcherTest {
 
     @Autowired

@@ -1,19 +1,19 @@
 package com.jammking.webprobe.crawler.adapter
 
-import com.jammking.webprobe.crawler.CrawlerTestApplication
 import com.jammking.webprobe.crawler.adapter.robots.RobotsTxtParser
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 
+class RobotsTxtParserUnitTest {
 
-@SpringBootTest(classes = [CrawlerTestApplication::class])
-class RobotsTxtParserTest {
+    private lateinit var parser: RobotsTxtParser
 
-    @Autowired
-    lateinit var parser: RobotsTxtParser
+    @BeforeEach
+    fun setup() {
+        parser = RobotsTxtParser()
+    }
 
     @Test
     fun `should disallow path for user-agent star`() {
@@ -74,6 +74,6 @@ class RobotsTxtParserTest {
 
         val policy = parser.parse(robotsTxt)
 
-        assertTrue(policy.isAllowed("WebProbe", "google-only"))
+        assertFalse(policy.isAllowed("WebProbe", "google-only"))
     }
 }
