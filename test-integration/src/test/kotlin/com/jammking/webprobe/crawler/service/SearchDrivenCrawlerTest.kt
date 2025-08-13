@@ -8,24 +8,20 @@ import com.jammking.webprobe.data.service.CrawledPageStorage
 import com.jammking.webprobe.data.service.UserSeenStorage
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 
-@ActiveProfiles("test")
+@Tag("integration")
+@ActiveProfiles("integration")
 @SpringBootTest(classes = [CrawlerDataTestApplication::class])
 class SearchDrivenCrawlerTest {
 
     @Autowired
     lateinit var crawler: SearchDrivenCrawler
-
-    @Autowired
-    lateinit var crawledPageStorage: CrawledPageStorage
-
-    @Autowired
-    lateinit var userSeenStorage: UserSeenStorage
 
     private val log = LoggerFactory.getLogger(this::class.java)
 
