@@ -2,3 +2,4 @@ spring:
   data:
     mongodb:
       uri: mongodb://localhost:27017/webprobe-test
+      a  uto-index-creation: true
