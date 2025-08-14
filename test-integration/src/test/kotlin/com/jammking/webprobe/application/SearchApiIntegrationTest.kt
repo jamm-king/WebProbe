@@ -6,7 +6,11 @@ import com.jammking.webprobe.crawler.model.SearchEngine
 import com.jammking.webprobe.crawler.port.UrlFetcher
 import com.jammking.webprobe.crawler.service.resolver.UrlFetcherResolver
 import com.jammking.webprobe.data.entity.CrawledPage
+import com.jammking.webprobe.data.service.CrawledPageStorage
+import com.jammking.webprobe.data.service.UserSeenStorage
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.*
@@ -26,12 +30,26 @@ import org.springframework.test.web.reactive.server.WebTestClient
 )
 @AutoConfigureWebTestClient
 class SearchApiIntegrationTest(
-    @Autowired private val webTestClient: WebTestClient
+    @Autowired private val webTestClient: WebTestClient,
+    @Autowired private val crawledPageStorage: CrawledPageStorage,
+    @Autowired private val userSeenStorage: UserSeenStorage
 ) {
     @MockBean
     lateinit var urlFetcherResolver: UrlFetcherResolver
     @MockBean
     lateinit var robotsTxtEvaluator: RobotsTxtEvaluator
+
+    @BeforeEach
+    fun setup() {
+        crawledPageStorage.deleteAll()
+        userSeenStorage.deleteAll()
+    }
+
+    @AfterEach
+    fun cleanup() {
+        crawledPageStorage.deleteAll()
+        userSeenStorage.deleteAll()
+    }
 
     @Test
     fun `POST search returns pages end-to-end`() = runTest {
