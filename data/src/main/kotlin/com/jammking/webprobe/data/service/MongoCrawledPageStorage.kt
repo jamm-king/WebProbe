@@ -44,4 +44,14 @@ class MongoCrawledPageStorage(
             throw StorageException("Failed to check CrawledPage existence", e)
         }
     }
+
+    override fun deleteAll() {
+        try {
+            repository.deleteAll()
+            log.info("Deleted all CrawledPage documents")
+        } catch(e: Exception) {
+            log.error("Failed to delete all CrawledPage documents: reason=${e.message}")
+            throw StorageException("Failed to delete all CrawledPage records", e)
+        }
+    }
 }
