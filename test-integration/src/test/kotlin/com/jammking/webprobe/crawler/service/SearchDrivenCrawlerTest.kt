@@ -3,9 +3,6 @@ package com.jammking.webprobe.crawler.service
 import com.jammking.webprobe.CrawlerDataTestApplication
 import com.jammking.webprobe.crawler.model.SearchEngine
 import com.jammking.webprobe.crawler.model.SearchRequest
-import com.jammking.webprobe.data.entity.CrawledPage
-import com.jammking.webprobe.data.service.CrawledPageStorage
-import com.jammking.webprobe.data.service.UserSeenStorage
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Tag

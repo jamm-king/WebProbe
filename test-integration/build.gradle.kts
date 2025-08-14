@@ -6,10 +6,12 @@ plugins {
 }
 
 dependencies {
+    implementation(project(":application"))
     implementation(project(":crawler"))
     implementation(project(":data"))
     implementation(project(":common"))
 
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
@@ -18,6 +20,10 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
+    testImplementation("org.mockito:mockito-core:5.13.0")
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
 }
 
 tasks.bootJar { enabled = false }
