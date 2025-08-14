@@ -31,4 +31,14 @@ class MongoUserSeenUrlStorage(
             throw StorageException("Failed to check UserSeenUrl existence", e)
         }
     }
+
+    override fun deleteAll() {
+        try {
+            repository.deleteAll()
+            log.info("Deleted all UserSeenUrl documents")
+        } catch(e: Exception) {
+            log.error("Failed to delete all UserSeenUrl documents: reason=${e.message}")
+            throw StorageException("Failed to delete all UserSeenUrl records", e)
+        }
+    }
 }
