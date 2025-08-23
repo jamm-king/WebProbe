@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   mongo:
     image: mongo:6
@@ -14,9 +13,17 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: webprobe:latest
     container_name: webprobe-app
     ports:
       - "8080:8080"
+    init: true
+    ipc: host
+    security_opt:
+      - seccomp=./seccomp_profile.json
+    user: "pwuser"
+    environment:
+      - JAVA_TOOL_OPTIONS=-Dplaywright.log=debug -Dplaywright.tmpdir=/pwtmp
     depends_on:
       - mongo
     networks:

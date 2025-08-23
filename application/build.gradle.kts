@@ -1,3 +1,5 @@
+import org.springframework.boot.gradle.tasks.bundling.BootJar
+
 plugins {
     kotlin("jvm")
     kotlin("plugin.spring")
@@ -15,4 +17,16 @@ dependencies {
     implementation(project(":crawler"))
     implementation(project(":data"))
     implementation(project(":llm"))
+}
+
+tasks.named<BootJar>("bootJar") {
+    isZip64 = true
+
+    requiresUnpack("com.microsoft.playwright:playwright")
+    requiresUnpack("com.microsoft.playwright:driver")
+    requiresUnpack("com.microsoft.playwright:driver-bundle")
+
+    requiresUnpack("**/playwright-*.jar")
+    requiresUnpack("**/driver-*.jar")
+    requiresUnpack("**/driver-bundle-*.jar")
 }

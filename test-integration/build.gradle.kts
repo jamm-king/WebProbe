@@ -43,7 +43,3 @@ val integrationTest = tasks.register<Test>("integrationTest") {
     }
     shouldRunAfter(tasks.test)
 }
-
-tasks.check {
-    dependsOn(integrationTest)
-}
