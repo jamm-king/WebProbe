@@ -4,8 +4,10 @@ import com.jammking.webprobe.data.entity.BlogPost
 import com.jammking.webprobe.data.exception.StorageException
 import com.jammking.webprobe.data.repository.BlogPostRepository
 import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Service
 import java.time.Instant
 
+@Service
 class MongoBlogPostStorage(
     private val repository: BlogPostRepository
 ): BlogPostStorage {
