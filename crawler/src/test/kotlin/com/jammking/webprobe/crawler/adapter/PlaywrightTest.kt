@@ -34,17 +34,14 @@ class PlaywrightTest {
 //        page.navigate("https://goodprogramer.tistory.com/359")
         page.navigate("https://utokia.tistory.com/204")
 
-//        val title = page.locator(".title-article").textContent()
-//        val date = page.locator(".date").allTextContents()[0]
-//        val lang = page.locator("html").getAttribute("lang")
-        val text = page.locator(".article-view").locator("span").allTextContents()
+        val title = page.locator(".title-article").textContent()
+        val date = page.locator(".date").allTextContents()[0]
+        val lang = page.locator("html").getAttribute("lang")
+        val text = page.locator(".article-view").locator("span").allTextContents().joinToString("\n")
 
-//        println("title : $title")
-//        println("date : $date")
-//        println("lang : $lang")
-//        println("text : $text")
-        text.forEach {
-            println(it)
-        }
+        println("title : $title")
+        println("date : $date")
+        println("lang : $lang")
+        println("text : $text")
     }
 }
