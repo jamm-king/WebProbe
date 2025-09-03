@@ -1,7 +1,7 @@
 package com.jammking.webprobe.crawler.port
 
-import com.jammking.webprobe.data.entity.CrawledPage
+import com.microsoft.playwright.Page
 
 interface UrlFetcher {
-    suspend fun fetch(url: String): CrawledPage
+    suspend fun fetch(url: String): Page
 }

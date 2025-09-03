@@ -7,10 +7,11 @@ import com.jammking.webprobe.crawler.exception.ParseException
 import com.jammking.webprobe.crawler.exception.SearcherException
 import com.jammking.webprobe.crawler.model.*
 import com.jammking.webprobe.crawler.port.Searcher
-import com.jammking.webprobe.crawler.service.resolver.UrlFetcherResolver
-import com.jammking.webprobe.data.entity.CrawledPage
+import com.jammking.webprobe.crawler.port.Transformer
+import com.jammking.webprobe.crawler.port.UrlFetcher
+import com.jammking.webprobe.data.entity.BlogPost
 import com.jammking.webprobe.data.exception.StorageException
-import com.jammking.webprobe.data.service.CrawledPageStorage
+import com.jammking.webprobe.data.service.BlogPostStorage
 import com.jammking.webprobe.data.service.UserSeenStorage
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -23,9 +24,10 @@ import java.util.*
 @Service
 class SearchDrivenCrawler(
     private val searcherMap: Map<SearchEngine, Searcher>,
-    private val urlFetcherResolver: UrlFetcherResolver,
+    private val urlFetcher: UrlFetcher,
+    private val transformer: Transformer,
     private val robotsEvaluator: RobotsTxtEvaluator,
-    private val crawledPageStorage: CrawledPageStorage,
+    private val blogPostStorage: BlogPostStorage,
     private val userSeenStorage: UserSeenStorage
 ): Crawler {
 
@@ -70,12 +72,12 @@ class SearchDrivenCrawler(
             }
         }.awaitAll()
 
-        val cachedPages = Collections.synchronizedList(mutableListOf<CrawledPage>())
+        val cachedPages = Collections.synchronizedList(mutableListOf<BlogPost>())
         val urlsToFetch = Collections.synchronizedList(mutableListOf<String>())
 
         allUrls.forEach { url ->
             val cachedPage = try {
-                crawledPageStorage.findByUrl(url)
+                blogPostStorage.findByUrl(url)
             } catch(e: StorageException) {
                 log.warn("Cache lookup failed for $url", e)
                 null
@@ -107,15 +109,16 @@ class SearchDrivenCrawler(
             } else {
                 async {
                     try {
-                        val fetcher = urlFetcherResolver.resolve(url)
-                        val page = fetcher.fetch(url)
+                        val page = urlFetcher.fetch(url)
+                        val post = transformer.transform(page)
+                        page.close()
 
                         try {
-                            crawledPageStorage.save(url, page.title, page.html, page.text)
+                            blogPostStorage.save(url, post.title, post.date, post.lang, post.text)
                         } catch(e: StorageException) {
-                            log.warn("Failed to save crawled page for $url", e)
+                            log.warn("Failed to save blog post for $url", e)
                         }
-                        pages.add(page)
+                        pages.add(post)
 
                         userId?.let {
                             try {

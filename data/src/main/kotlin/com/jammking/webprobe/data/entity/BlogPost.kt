@@ -2,8 +2,10 @@ package com.jammking.webprobe.data.entity
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.index.Indexed
+import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
 
+@Document(collection = "blog_posts")
 data class BlogPost(
     @Id val url: String,
     val title: String,
