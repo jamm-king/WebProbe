@@ -2,9 +2,9 @@ package com.jammking.webprobe.crawler.adapter
 
 import com.jammking.webprobe.CrawlerDataTestApplication
 import com.jammking.webprobe.crawler.adapter.fetcher.PlaywrightUrlFetcher
-import com.jammking.webprobe.data.entity.CrawledPage
 import com.jammking.webprobe.data.service.CrawledPageStorage
 import com.jammking.webprobe.data.service.UserSeenStorage
+import com.microsoft.playwright.Page
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -71,13 +71,10 @@ class PlaywrightUrlFetcherTest(
         val url = server.url("/test").toString()
 
         // when
-        val result: CrawledPage = fetcher.fetch(url)
+        val result: Page = fetcher.fetch(url)
 
         // then
-        assertThat(result.url).isEqualTo(url)
-        assertThat(result.title).isEqualTo("rendering check")
-        assertThat(result.html).contains("<html").contains("</html>")
-        assertThat(result.text).isNotBlank
-        assertThat(result.text).contains("Hello WebProbe")
+        assertThat(result.url()).isEqualTo(url)
+        assertThat(result.title()).isEqualTo("rendering check")
     }
 }

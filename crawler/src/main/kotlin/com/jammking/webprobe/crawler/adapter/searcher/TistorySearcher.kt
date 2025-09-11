@@ -5,7 +5,6 @@ import com.jammking.webprobe.crawler.model.SearchEngine
 import com.jammking.webprobe.crawler.model.SearchRequest
 import com.jammking.webprobe.crawler.port.Searcher
 import com.jammking.webprobe.crawler.port.UrlFetcher
-import com.jammking.webprobe.crawler.service.resolver.UrlFetcherResolver
 import com.jammking.webprobe.data.exception.StorageException
 import com.jammking.webprobe.data.service.UserSeenStorage
 import kotlinx.coroutines.delay
@@ -16,7 +15,7 @@ import java.net.URLEncoder
 
 @Component
 class TistorySearcher(
-    private val urlFetcherResolver: UrlFetcherResolver,
+    private val urlFetcher: UrlFetcher,
     private val userSeenStorage: UserSeenStorage
 ): Searcher {
 
@@ -38,8 +37,7 @@ class TistorySearcher(
             log.debug("fetching Tistory search page: $url")
 
             val html = try {
-                val urlFetcher = urlFetcherResolver.resolve(url)
-                urlFetcher.fetch(url).html
+                urlFetcher.fetch(url).content()
             } catch(e: Exception) {
                 throw SearcherException(SearchEngine.TISTORY, keyword, e)
             }
